@@ -93,7 +93,13 @@ class WC_Tracks {
 	 * @return null|string Store gross revenue, or null if cache error.
 	 */
 	public static function get_total_revenue() {
-		$total_revenue = get_option( self::REVENUE_CACHE_OPTION );
+		$total_revenue = get_option( self::REVENUE_CACHE_OPTION, false );
+
+		if ( false === $total_revenue ) {
+			$total_revenue = WC_Tracker::get_order_totals();
+
+			update_option( self::REVENUE_CACHE_OPTION, $total_revenue );
+		}
 
 		return empty( $total_revenue['gross'] ) ? null : $total_revenue['gross'];
 	}
