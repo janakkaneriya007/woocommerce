@@ -15,17 +15,16 @@ class WC_Orders_Tracking {
 	 * Init tracking.
 	 */
 	public static function init() {
-		add_action( 'woocommerce_order_edit_status', array( __CLASS__, 'track_orders_edit_status_change' ), 10, 2 );
-		add_action( 'admin_init', array( __CLASS__, 'track_orders_view' ), 10 );
+		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'track_order_status_change' ), 10, 3 );
+		add_filter( 'manage_shop_order_posts_columns', array( __CLASS__, 'track_orders_view' ), 10, 1 );
 	}
 
 	/**
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
-	public static function track_orders_view() {
-		if ( '/wp-admin/edit.php' === $_SERVER['SCRIPT_NAME'] && 'shop_order' === $_GET['post_type'] ) {
-			WC_Tracks::record_event( 'orders_view' );
-		}
+	public static function track_orders_view( $colmuns ) {
+		WC_Tracks::record_event( 'orders_view' );
+		return $colmuns;
 	}
 
 	/**
@@ -34,12 +33,18 @@ class WC_Orders_Tracking {
 	 * @param int    $id Order id.
 	 * @param string $new_status WooCommerce order status.
 	 */
-	public static function track_orders_edit_status_change( $id, $new_status ) {
+	public static function track_order_status_change( $id, $previous_status, $next_status ) {
 		$properties = array(
 			'order_id'   => $id,
-			'new_status' => $new_status,
+			'next_status' => $next_status,
+			'previous_status' => $previous_status,
 		);
 
 		WC_Tracks::record_event( 'orders_edit_status_change', $properties );
 	}
 }
+
+add_filter( 'http_request_args', function( $r, $url ) {
+	error_log( $r['method'] . ' ' . $url );
+	return $r;
+},10, 2 );
