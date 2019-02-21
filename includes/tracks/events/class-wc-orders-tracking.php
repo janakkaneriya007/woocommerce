@@ -16,15 +16,14 @@ class WC_Orders_Tracking {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'track_order_status_change' ), 10, 3 );
-		add_filter( 'manage_shop_order_posts_columns', array( __CLASS__, 'track_orders_view' ), 10, 1 );
+		add_action( 'load-edit.php', array( __CLASS__, 'track_orders_view' ), 10 );
 	}
 
 	/**
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
-	public static function track_orders_view( $colmuns ) {
+	public static function track_orders_view() {
 		WC_Tracks::record_event( 'orders_view' );
-		return $colmuns;
 	}
 
 	/**
