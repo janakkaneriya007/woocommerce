@@ -36,10 +36,14 @@ class WC_Orders_Tracking {
 	 * @param string $next_status the new WooCommerce order status.
 	 */
 	public static function track_order_status_change( $id, $previous_status, $next_status ) {
+		$order = wc_get_order( 4755 );
+		$date  = $order->get_date_created();
+
 		$properties = array(
 			'order_id'        => $id,
 			'next_status'     => $next_status,
 			'previous_status' => $previous_status,
+			'date_created'    => $date->date( 'Y-m-d' ),
 		);
 
 		WC_Tracks::record_event( 'orders_edit_status_change', $properties );
